@@ -1,0 +1,28 @@
+<script type="text/javascript">
+	function switch_user_profile_json()
+	{
+		var user_profile_json_block = document.getElementById('user_profile_json');
+		if (user_profile_json_block.style.display == 'none') 
+			user_profile_json_block.style.display = 'block';
+		else
+			user_profile_json_block.style.display = 'none';
+		
+	}
+</script>
+
+<div style="display: inline-flex; justify-content: center; align-content: center">
+    <div style="display: flex; justify-content: center; align-items: center;">
+        <img src="{{ user_info.picture.thumbnail }}">
+    </div>
+    <div style="margin: 5px 0px 0px 15px; position: relative; text-align: center;">
+        <b>{{ user_info.name.last }} {{ user_info.name.first }}</b><br>
+        <button onclick="switch_user_profile_json();">Посмотреть JSON</button>
+        <div id="user_profile_json" style="position: absolute; left: -250px; padding: 10px 20px 10px 20px; border: 1px solid grey; background-color: black; display:none;  text-align: left;">
+			<small>
+				{% autoescape off %}
+					{{ user_info_json }}
+				{% endautoescape %}
+			</small>
+        </div>
+    </div>
+</div>

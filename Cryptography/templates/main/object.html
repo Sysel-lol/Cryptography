@@ -1,0 +1,158 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ cryptography_object_form.instance.name }} | Криптография{% endblock %}
+
+{% block content %}
+    <div class="centered-block">
+        <div class="div-block">
+{#            Выбор объекта#}
+            Выберите объект:
+            <div class="div-block">
+                <select class="form-control"  class="form-control"  id="select_object"  style="margin-top: 20px">
+                    <option value>Создать новый объект...</option>
+                    {% for cryptography_object in cryptography_object_list %}
+                        <option value="{{ cryptography_object.id }}"
+                                {% if cryptography_object.id == cryptography_object_form.instance.id %}selected{% endif %}>
+                            {{ cryptography_object.name }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <br>
+            <p {% if cryptography_object_form.errors %}style="display: none"{% endif %}>
+                <button id="show_object_properties"><img height="17px" src="{% static '/images/properties.png' %}" style="margin-right: 8px; margin-bottom: 1px">Показать свойства объекта</button>
+            </p>
+{#            Свойства объекта#}
+            <div class="div-block" id="object_properties" style="{% if not cryptography_object_form.errors %}display: none;{% endif %} margin-bottom: 20px">
+                <p><button id="hide_object_properties"><img height="17px" src="{% static '/images/hide.png' %}" style="margin-right: 8px; margin-bottom: 1px">Скрыть свойства объекта</button></p>
+                {% if cryptography_object_form.instance.is_file %}
+                    <div class="div-block">
+                    <form method="POST" enctype="multipart/form-data" style="text-align: center; width: 650px; word-break: break-all; text-align: center;">
+                        {% csrf_token %}
+                        <p>
+                            {{ cryptography_object_form.name.label }}:
+                            {{ cryptography_object_form.name }}
+                        </p>
+                        <p>
+                            {{ cryptography_object_form.cipher.label }}:
+                            {{ cryptography_object_form.cipher }}
+                        </p>
+                        <p id="key_length_field">
+                            {{ cryptography_object_form.key_length.label }}:
+                            {{ cryptography_object_form.key_length }}
+                        </p>
+                        {% if cryptography_object_form.instance.cipher.is_asymmetric %}
+                            <p id="fingerprint">
+                                {{ cryptography_object_form.instance.fingerprint }}
+                            </p>
+                        {% endif %}
+                        {{ cryptography_object_form.non_field_errors }}
+                        <div style="margin: 10px 0 30px 0">
+                            <div class="div-block" id="private_key">
+                                {{ cryptography_object_form.private_key.label }}<br>
+                                {{ cryptography_object_form.instance.file_name.0 }}<br>
+                                <input class="form-control"  type="file" name="{{ cryptography_object_form.private_key.name }}">
+                            </div>
+                            {% if cryptography_object_form.instance.cipher.is_asymmetric %}
+                                <div class="div-block" id="public_key">
+                                    {{ cryptography_object_form.public_key.label }}<br>
+                                    {{ cryptography_object_form.instance.file_name.1 }}<br>
+                                    <input class="form-control"  type="file" name="{{ cryptography_object_form.public_key.name }}">
+                                </div>
+                            {% endif %}
+                        </div>
+                        <p><button name="save_object" value="file" id="save_button"><img height="17px" src="{% static '/images/save.png' %}" style="margin-right: 8px; margin-bottom: 1px">Сохранить объект</button></p>
+                    </form>
+                </div>
+                {% elif cryptography_object_form.instance.cipher.is_asymmetric %}
+                    <div class="div-block">
+                        <form method="POST" style="text-align: center; width: 650px; word-break: break-all; text-align: center;">
+                            {% csrf_token %}
+                            <p>
+                                {{ cryptography_object_form.name.label }}:
+                                {{ cryptography_object_form.name }}
+                            </p>
+                            <p>
+                                {{ cryptography_object_form.cipher.label }}:
+                                {{ cryptography_object_form.cipher }}
+                            </p>
+                            <p id="key_length_field">
+                                {{ cryptography_object_form.key_length.label }}:
+                                {{ cryptography_object_form.key_length }}
+                            </p>
+                            <p id="fingerprint">
+                                {{ cryptography_object_form.instance.fingerprint }}
+                            </p>
+                            <p>
+                                <button id="generate_keys" value="{{ cryptography_object_form.instance.key_length.id }}"><img height="17px" src="{% static '/images/regenerate.png' %}" style="margin-right: 8px; margin-bottom: 1px">Сгенерировать новые ключи</button>
+                            </p>
+                            {{ cryptography_object_form.non_field_errors }}
+                            <div id="div_is_not_file">
+                                <div id="private_key_field" class="div-block">
+                                    {{ cryptography_object_form.private_key.label }}<br>
+                                    {{ cryptography_object_form.private_key }}
+                                    <p><a href="{% url 'main:export_key' object_id=object_id %}"><button><img height="17px" src="{% static '/images/download.png' %}" style="margin-right: 8px; margin-bottom: 1px">Скачать закрытый ключ</button></a></p>
+
+                                </div>
+                                <div id="public_key_field" class="div-block">
+                                    {{ cryptography_object_form.public_key.label }}<br>
+                                    {{ cryptography_object_form.public_key }}
+                                    <p><a href="{% url 'main:export_key' object_id=object_id public_key=1%}"><button><img height="17px" src="{% static '/images/download.png' %}" style="margin-right: 8px; margin-bottom: 1px">Скачать открытый ключ</button></a></p>
+                                </div>
+                            </div>
+                            <p><button name="save_object" value="key"><img height="17px" src="{% static '/images/save.png' %}" style="margin-right: 8px; margin-bottom: 1px">Сохранить объект</button></p>
+                        </form>
+                    </div>
+                {% else %}
+                    <form method="POST" style="text-align: center; word-break: break-all; text-align: center;">
+                        {% csrf_token %}
+                        <p>
+                            {{ cryptography_object_form.name.label }}:
+                            {{ cryptography_object_form.name }}
+                        </p>
+                        <p>
+                            {{ cryptography_object_form.cipher.label }}:
+                            {{ cryptography_object_form.cipher }}
+                        </p>
+                        <p id="key_length_field" style="display:none">
+                            {{ cryptography_object_form.key_length.label }}:
+                            {{ cryptography_object_form.key_length }}
+                        </p>
+                        <p>
+                            <button id="generate_keys" value="{{ cryptography_object_form.instance.key_length.id }}"><img height="17px" src="{% static '/images/regenerate.png' %}" style="margin-right: 8px; margin-bottom: 1px">Сгенерировать новый ключ</button>
+                        </p>
+                        {{ cryptography_object_form.non_field_errors }}
+                        <div>
+                            <div id="private_key_field" class="div-block">
+                                {{ cryptography_object_form.private_key.label }}<br>
+                                {{ cryptography_object_form.private_key }}
+                            </div>
+                            <p><a href="{% url 'main:export_key' object_id=object_id %}"><button><img height="17px" src="{% static '/images/download.png' %}" style="margin-right: 8px; margin-bottom: 1px">Скачать закрытый ключ</button></a></p>
+                        </div>
+                        <p><button name="save_object" value="key"><img height="17px" src="{% static '/images/save.png' %}" style="margin-right: 8px; margin-bottom: 1px">Сохранить объект</button></p>
+                    </form>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <div class="centered-block">
+        <form method="POST">
+            {% csrf_token %}
+            <div class="div-block">
+                Исходные данные:<br>
+                {{ input_form.input }}
+            </div>
+            <div class="div-block">
+                Результат:<br>
+                {{ input_form.output }}
+            </div>
+            <div style="text-align: center">
+                <button name="process_input" value="encrypt">Зашифровать исходные данные</button>
+                <button name="process_input" value="decrypt">Расшифровать исходные данные</button>
+            </div>
+        </form>
+    </div>
+
+{% endblock %}

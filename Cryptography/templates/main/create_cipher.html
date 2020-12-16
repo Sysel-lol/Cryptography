@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+
+{% block title %}Криптография{% endblock %}
+
+{% block content %}
+
+    <form method="POST">
+        {% csrf_token %}
+        {{ form }}
+        <input class="form-control"  type="submit">
+    </form>
+
+{% endblock %}

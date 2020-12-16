@@ -1,0 +1,61 @@
+body {
+    background-image: url('/static/images/bg.png');
+    background-size: cover;
+    color: #ddd9d9!important;
+    font-size: .950em!important;
+}
+
+select, input, textarea {
+    padding: .175rem .5rem!important;
+    display: inline-block!important;
+    width: auto!important;
+}
+
+select {
+    -webkit-appearance: menulist!important;
+    -moz-appearance: menulist!important;
+    appearance: menulist!important;
+}
+
+button {
+    background-color:transparent;
+    color: white!important;
+    border: 1px solid #f8f9fa!important;
+    padding: 3px 0.75rem!important;
+    border-radius: .25rem!important;
+    padding-bottom: 4px!important;
+    padding-top: 2px!important;
+    font-size: .875em!important;
+}
+
+textarea {
+    resize: none!important;
+}
+
+button:hover {
+    background-color: #1d1d1d;
+}
+
+p {
+    margin-top: 1em!important;
+}
+
+.errorlist li {
+    margin-top: 1em!important;
+}
+
+.content {
+    background-color: rgba(0, 0, 0, 0.7);
+    padding: 40px
+}
+
+.centered-block {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.div-block {
+    display: inline-block;
+    text-align: center;
+}
