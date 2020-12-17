@@ -57,7 +57,6 @@ class IndexView(View):
         if request.POST.get('save_object'):
             cryptography_object_form = forms.CryptographyObjectForm(
                 request.POST.copy(), instance=cryptography_object_instance, files=request.FILES)
-            print(cryptography_object_form['cipher'].value(), cryptography_object_form['key_length'].value())
             if cryptography_object_form.is_valid():
                 cryptography_object = cryptography_object_form.save()
                 return redirect("main:index", object_id=cryptography_object.id)
@@ -69,12 +68,19 @@ class IndexView(View):
                 input_data = self.input_form.cleaned_data['input']
                 if request.POST.get('process_input') == "encrypt":
                     key = keys[1] if cryptography_object_instance.cipher.is_asymmetric else keys[0]
-                    output_data = cryptography_object_instance.cipher.engine.encrypt(
-                        input_data, key)
+                    try:
+                        output_data = cryptography_object_instance.cipher.engine.encrypt(
+                            input_data, key)
+                    except Exception:
+                        output_data = "Произошла ошибка при зашифровывании исходных данных."
                 elif request.POST.get('process_input') == "decrypt":
                     key = keys[0]
-                    output_data = cryptography_object_instance.cipher.engine.decrypt(
-                        input_data, key)
+                    try:
+                        output_data = cryptography_object_instance.cipher.engine.decrypt(
+                            input_data, key)
+                    except Exception:
+                        output_data = "Произошла ошибка при расшифровывании исходных данных."
+
                 self.input_form = forms.InputForm({
                     'input': input_data,
                     'output': output_data

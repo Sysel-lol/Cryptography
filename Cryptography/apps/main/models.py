@@ -5,7 +5,7 @@ import base64
 from pathlib import Path
 
 from django.db import models
-from django.db.models.signals import post_init
+from django.db.models.signals import post_init, pre_save
 from django.core.exceptions import ValidationError
 from django.http import HttpResponse
 from Crypto.Cipher import AES
@@ -13,7 +13,7 @@ from phe import paillier
 import rsa
 
 from cryptography.fernet import Fernet
-from Cryptography.settings import MEDIA_ROOT
+from Cryptography.settings import MEDIA_ROOT, SECRET_KEY
 
 
 class CipherKeyLength(models.Model):
@@ -85,7 +85,7 @@ class CryptographyObject(models.Model):
     key_length = models.ForeignKey(
         CipherKeyLengthRelation, default=DEFAULT_KEY_LENGTH_ID, on_delete=models.DO_NOTHING, verbose_name='Длина ключа')
     private_key = models.TextField('Закрытый ключ')
-    public_key = models.TextField('Открытый ключ', blank=True)
+    public_key = models.TextField('Открытый ключ', blank=True, null=True)
     is_file = models.BooleanField('Из файла', default=False)
 
     def export_to_file(self, public_key: bool = 0):
@@ -263,14 +263,29 @@ class CryptographyObject(models.Model):
         if any(instance.get_keys()) or instance.is_file:
             return
         instance.key_length = CipherKeyLengthRelation.objects.filter(cipher_id=instance.cipher.id).first()
-        new_keys = instance.cipher.engine.new_keys(instance.get_key_length)
+        if instance.cipher.is_asymmetric:
+            new_keys = instance.cipher.engine.new_keys(instance.get_key_length)
+        else:
+            secret_key_bytes = SECRET_KEY.encode('utf8')[:32]
+            new_private_key = base64.urlsafe_b64encode(secret_key_bytes).decode('utf8')
+            new_keys = (new_private_key, None)
         instance.set_keys(*new_keys)
+
+    @staticmethod
+    def pre_save(**kwargs):
+        """
+            Necessary actions before cryptography object saving, connected via pre_save.connect function below.
+        """
+        instance = kwargs.get('instance')
+        if not instance.cipher.is_asymmetric:
+            instance.public_key = None
 
     def __str__(self):
         return self.name
 
 
 post_init.connect(CryptographyObject.post_init, CryptographyObject)
+pre_save.connect(CryptographyObject.pre_save, CryptographyObject)
 
 
 class ICipher:
