@@ -20,26 +20,20 @@ class CryptographyObjectForm(forms.ModelForm):
         file_error = False
         if files:
             old_state = copy.deepcopy(instance)
-            instance.is_file = True
-            key_files = {}
             for field_name in files:
-                fs = FileSystemStorage()
-                filename = fs.save(files[field_name].name, files[field_name])
-                uploaded_file_url = fs.path(filename)
-                instance.set_keys(**{field_name: str(uploaded_file_url)})
-            try:
-                instance.full_clean(exclude=['name'])
-            except ValidationError as error:
-                fs = FileSystemStorage()
-                for file in key_files:
-                    fs.delete(file)
-                file_error = error
+                file_data = next(files[field_name].chunks())
+                try:
+                    instance.parse_file(file_data)
+                except Exception as error:
+                    file_error = error
+            if not file_error:
+                try:
+                    instance.full_clean(exclude=['name'])
+                except (ValidationError, ValueError) as error:
+                    file_error = error
+                    instance = old_state
+            else:
                 instance = old_state
-
-        if instance.is_file:
-            self.base_fields['key_length'].disabled, self.base_fields['cipher'].disabled = True, True
-        else:
-            self.base_fields['key_length'].disabled, self.base_fields['cipher'].disabled = False, False
 
         if args:
             for field in self.base_fields:

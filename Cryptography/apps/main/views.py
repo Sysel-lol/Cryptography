@@ -71,15 +71,15 @@ class IndexView(View):
                     try:
                         output_data = cryptography_object_instance.cipher.engine.encrypt(
                             input_data, key)
-                    except Exception:
-                        output_data = "Произошла ошибка при зашифровывании исходных данных."
+                    except Exception as e:
+                        output_data = "Произошла ошибка при зашифровывании исходных данных."+str(e)
                 elif request.POST.get('process_input') == "decrypt":
                     key = keys[0]
                     try:
                         output_data = cryptography_object_instance.cipher.engine.decrypt(
                             input_data, key)
-                    except Exception:
-                        output_data = "Произошла ошибка при расшифровывании исходных данных."
+                    except Exception as e:
+                        output_data = "Произошла ошибка при расшифровывании исходных данных."+str(e)
 
                 self.input_form = forms.InputForm({
                     'input': input_data,
