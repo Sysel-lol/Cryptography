@@ -7,6 +7,7 @@ from django.db.models.signals import post_init, pre_save
 from django.core.exceptions import ValidationError
 from django.http import HttpResponse
 from django.utils.encoding import escape_uri_path
+from django.shortcuts import reverse
 
 from Cryptography.settings import MEDIA_ROOT, SECRET_KEY
 from Cryptography.apps.main import adapters
@@ -87,7 +88,7 @@ class CryptographyObject(models.Model):
     The main class of the project. It unites all all necessary data for creating a cryptography object.
     """
     DEFAULT_CIPHER_ID = 1
-    DEFAULT_KEY_LENGTH_ID = 0
+    DEFAULT_KEY_LENGTH_ID = 1
 
     old_state = 0
 
@@ -261,6 +262,9 @@ class CryptographyObject(models.Model):
         instance = kwargs.get('instance')
         if not instance.cipher.is_asymmetric:
             instance.public_key = None
+
+    def get_absolute_url(self):
+        return reverse('main:cryptography_object', kwargs={'object_id': self.id})
 
     def __str__(self):
         return self.name

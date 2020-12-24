@@ -14,10 +14,14 @@ class CryptographyObjectForm(forms.ModelForm):
     If there's no field value in GET or POST data, it uses instance values.
     """
     def __init__(self, *args, **kwargs):
+
+        if 'instance' not in kwargs:
+            kwargs['instance'] = models.CryptographyObject()
         instance = kwargs['instance']
 
         files = kwargs.get('files')
         file_error = False
+
         if files:
             old_state = copy.deepcopy(instance)
             for field_name in files:
@@ -35,16 +39,19 @@ class CryptographyObjectForm(forms.ModelForm):
             else:
                 instance = old_state
 
-        if args:
+        if 'data' in kwargs:
+            kwargs['data'] = copy.deepcopy(kwargs['data'])
             for field in self.base_fields:
-                if field not in args[0] or not args[0][field] or self.base_fields[field].disabled:
-                    args[0][field] = getattr(instance, field)
+                if field not in kwargs['data'] or not kwargs['data'][field]:
+                    kwargs['data'][field] = getattr(instance, field)
 
         super(CryptographyObjectForm, self).__init__(*args, **kwargs)
+
         if file_error:
             self.add_error(field=None, error=file_error)
 
         self.fields['key_length'].queryset = models.CipherKeyLengthRelation.objects.filter(cipher_id=self['cipher'].value())
+
         for visible_field in self.visible_fields():
             visible_field.field.widget.attrs['class'] = 'form-control'
 

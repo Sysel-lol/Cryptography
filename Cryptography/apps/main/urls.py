@@ -6,7 +6,7 @@ app_name = "main"
 
 urlpatterns = [
     path('', views.IndexView.as_view(), name='index'),
-    path('<int:object_id>', views.IndexView.as_view(), name='index'),
+    path('cryptography_object/<int:object_id>', views.CryptographyObjectView.as_view(), name='cryptography_object'),
     path('generate_keys/', views.generate_keys, name='generate_keys'),
     path('cipher_defaults/', views.cipher_defaults, name='cipher_defaults'),
     path('get_user_info/', views.get_user_info, name='get_user_info'),

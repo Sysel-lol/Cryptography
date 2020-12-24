@@ -14,7 +14,7 @@
                     <select class="form-control"  id="select_object">
                         <option value>Создать новый объект...</option>
                         {% for cryptography_object in cryptography_object_list %}
-                            <option value="{{ cryptography_object.id }}"
+                            <option value="{{ cryptography_object.get_absolute_url }}"
                                     {% if cryptography_object.id == cryptography_object_form.instance.id %}selected{% endif %}>
                                 {{ cryptography_object.name }}
                             </option>

@@ -28,7 +28,7 @@ $('body').on('click', '#hide_object_properties',function () {
 
 $('body').on('change', '#select_object',function () {
     var object_id = $(this).val();
-    window.location.replace('/'+object_id)
+    window.location.replace(''+object_id)
 });
 
 $('body').on('change', '#select_type',function () {

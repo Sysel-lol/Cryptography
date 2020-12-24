@@ -12,7 +12,7 @@
                 <select class="form-control"  class="form-control"  id="select_object"  style="margin-top: 20px">
                     <option value>Создать новый объект...</option>
                     {% for cryptography_object in cryptography_object_list %}
-                        <option value="{{ cryptography_object.id }}"
+                        <option value="{{ cryptography_object.get_absolute_url }}"
                                 {% if cryptography_object.id == cryptography_object_form.instance.id %}selected{% endif %}>
                             {{ cryptography_object.name }}
                         </option>
@@ -92,13 +92,13 @@
                                 <div id="private_key_field" class="div-block">
                                     {{ cryptography_object_form.private_key.label }}<br>
                                     {{ cryptography_object_form.private_key }}
-                                    <p><button onclick="location.href='{% url 'main:export_key' object_id=object_id %}'; return false"><img height="17px" src="{% static '/images/download.png' %}" style="margin-right: 8px; margin-bottom: 1px">Скачать закрытый ключ</button></p>
+                                    <p><button onclick="location.href='{% url 'main:export_key' object_id=1  %}'; return false"><img height="17px" src="{% static '/images/download.png' %}" style="margin-right: 8px; margin-bottom: 1px">Скачать закрытый ключ</button></p>
 
                                 </div>
                                 <div id="public_key_field" class="div-block">
                                     {{ cryptography_object_form.public_key.label }}<br>
                                     {{ cryptography_object_form.public_key }}
-                                    <p><button onclick="location.href='{% url 'main:export_key' object_id=object_id public_key=1%}'; return false"><img height="17px" src="{% static '/images/download.png' %}" style="margin-right: 8px; margin-bottom: 1px">Скачать открытый ключ</button></p>
+                                    <p><button onclick="location.href='{% url 'main:export_key' object_id=1 public_key=1%}'; return false"><img height="17px" src="{% static '/images/download.png' %}" style="margin-right: 8px; margin-bottom: 1px">Скачать открытый ключ</button></p>
                                 </div>
                             </div>
                             <p><button name="save_object" value="key"><img height="17px" src="{% static '/images/save.png' %}" style="margin-right: 8px; margin-bottom: 1px">Сохранить объект</button></p>
@@ -128,7 +128,7 @@
                                 {{ cryptography_object_form.private_key.label }}<br>
                                 {{ cryptography_object_form.private_key }}
                             </div>
-                            <p><button onclick="location.href='{% url 'main:export_key' object_id=object_id %}'; return false"><img height="17px" src="{% static '/images/download.png' %}" style="margin-right: 8px; margin-bottom: 1px">Скачать закрытый ключ</button></p>
+                            <p><button onclick="location.href='{% url 'main:export_key' object_id=1  %}'; return false"><img height="17px" src="{% static '/images/download.png' %}" style="margin-right: 8px; margin-bottom: 1px">Скачать закрытый ключ</button></p>
                         </div>
                         <p><button name="save_object" value="key"><img height="17px" src="{% static '/images/save.png' %}" style="margin-right: 8px; margin-bottom: 1px">Сохранить объект</button></p>
                     </form>
