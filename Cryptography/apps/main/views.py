@@ -3,97 +3,19 @@ import json
 
 from django.shortcuts import render, redirect, reverse
 from django.http import HttpResponse, JsonResponse
-from django.views import View
-from django.views.generic.edit import FormView
+from django.views.generic.edit import UpdateView, CreateView
 from django.views.generic.detail import DetailView
 
 from Cryptography.apps.main import forms, models
 
 
-class IndexView2(View):
+class IndexView(CreateView):
     """
-    Used for both rendering the object creating form and an object use.
+    The main page of the project, where you are suggested creating a new CryptographyObject
+    for data encryption/decryption.
     """
-    input_form_class = forms.InputForm
-    input_form = forms.InputForm()
-    cryptography_object_form = None
-
-    def get(self, request, object_id=None):
-
-        cryptography_object_list = models.CryptographyObject.objects.all()
-
-        if object_id:
-            cryptography_object_instance = models.CryptographyObject.objects.filter(id=object_id).first()
-            if not cryptography_object_instance:
-                return redirect("main:index")
-            cryptography_object_form = self.cryptography_object_form if self.cryptography_object_form \
-                else forms.CryptographyObjectForm(instance=cryptography_object_instance)
-            cryptography_object_form.fields['cipher'].queryset = models.Cipher.objects.filter(
-                is_asymmetric=cryptography_object_form.instance.cipher.is_asymmetric)
-            return render(request, 'main/object.html', {
-                'cryptography_object_form': cryptography_object_form,
-                'input_form': self.input_form,
-                'object_id': object_id,
-                'cryptography_object_list': cryptography_object_list
-            })
-        else:
-            cryptography_object_form = self.cryptography_object_form if self.cryptography_object_form \
-                else forms.CryptographyObjectForm(instance=models.CryptographyObject())
-            symmetric_queryset = models.Cipher.objects.filter(is_asymmetric=False)
-            symmetric_cryptography_object_form = forms.CryptographyObjectForm(
-                instance=models.CryptographyObject(cipher=symmetric_queryset.first()))
-            symmetric_cryptography_object_form.fields['cipher'].queryset = symmetric_queryset
-            cryptography_object_form.fields['cipher'].queryset = models.Cipher.objects.filter(is_asymmetric=True)
-            return render(request, 'main/index.html', {
-                'cryptography_object_form': cryptography_object_form,
-                'symmetric_cryptography_object_form': symmetric_cryptography_object_form,
-                'cryptography_object_list': cryptography_object_list
-            })
-
-    def post(self, request, object_id=None):
-        cryptography_object_instance = models.CryptographyObject()
-        if object_id:
-            cryptography_object_instance = models.CryptographyObject.objects.filter(id=object_id).first()
-            if not cryptography_object_instance:
-                return redirect("main:index")
-        if request.POST.get():
-            cryptography_object_form = forms.CryptographyObjectForm(
-                request.POST.copy(), instance=cryptography_object_instance, files=request.FILES)
-            if cryptography_object_form.is_valid():
-                cryptography_object = cryptography_object_form.save()
-                return redirect("main:index", object_id=cryptography_object.id)
-            self.cryptography_object_form = cryptography_object_form
-        elif request.POST.get():
-            keys = cryptography_object_instance.get_keys()
-            self.input_form = self.input_form_class(request.POST)
-            if self.input_form.is_valid():
-                input_data = self.input_form.cleaned_data['input']
-                if request.POST.get() == "encrypt":
-                    key = keys[1] if cryptography_object_instance.cipher.is_asymmetric else keys[0]
-                    try:
-                        output_data = cryptography_object_instance.cipher.engine.encrypt(
-                            input_data, key)
-                    except Exception as e:
-                        output_data = "Произошла ошибка при зашифровывании исходных данных."+str(e)
-                elif request.POST.get() == "decrypt":
-                    key = keys[0]
-                    try:
-                        output_data = cryptography_object_instance.cipher.engine.decrypt(
-                            input_data, key)
-                    except Exception as e:
-                        output_data = "Произошла ошибка при расшифровывании исходных данных."+str(e)
-
-                self.input_form = forms.InputForm({
-                    'input': input_data,
-                    'output': output_data
-                })
-        return self.get(request, object_id)
-
-
-class IndexView(FormView):
     template_name = 'main/index.html'
     form_class = forms.CryptographyObjectForm
-    object_id = None
 
     def get_context_data(self, **kwargs):
         context_data = super(IndexView, self).get_context_data(**kwargs)
@@ -116,16 +38,14 @@ class IndexView(FormView):
             kwargs['files'] = self.request.FILES
         return kwargs
 
-    def form_valid(self, form):
-        cryptography_object = form.save()
-        self.object_id = cryptography_object.id
-        return super(IndexView, self).form_valid(form)
-
     def get_success_url(self):
-        return reverse('main:cryptography_object', kwargs={'object_id': self.object_id})
+        return reverse('main:cryptography_object', kwargs={'object_id': self.object.id})
 
 
 class CryptographyObjectView(DetailView):
+    """
+    Used both for CryptographyObject display and encryption/decryption of data.
+    """
     template_name = 'main/object.html'
     input_form_class = forms.InputForm
     input_form = None
@@ -145,6 +65,7 @@ class CryptographyObjectView(DetailView):
         context_data = super(CryptographyObjectView, self).get_context_data(**kwargs)
         context_data['cryptography_object_form'] = forms.CryptographyObjectForm(instance=self.object)
         context_data['input_form'] = self.input_form
+        context_data['object_id'] = self.object.id
         context_data['cryptography_object_list'] = self.model.objects.all()
         return context_data
 
@@ -152,20 +73,19 @@ class CryptographyObjectView(DetailView):
         get_response = self.get(*args, **kwargs)
         if not self.input_form.is_valid():
             return get_response
-        keys = self.object.get_keys()
         input_data = self.input_form.cleaned_data['input']
+        output_data = ''
         if self.request.POST.get('process_input') == "encrypt":
-            key = keys[1] if self.object.cipher.is_asymmetric else keys[0]
+            key = self.object.public_key if self.object.cipher.is_asymmetric else self.object.private_key
             try:
                 output_data = self.object.cipher.engine.encrypt(
                     input_data, key)
             except Exception as e:
                 output_data = "Произошла ошибка при зашифровывании исходных данных." + str(e)
         elif self.request.POST.get('process_input') == "decrypt":
-            key = keys[0]
             try:
                 output_data = self.object.cipher.engine.decrypt(
-                    input_data, key)
+                    input_data, self.object.private_key)
             except Exception as e:
                 output_data = "Произошла ошибка при расшифровывании исходных данных." + str(e)
 
@@ -175,6 +95,19 @@ class CryptographyObjectView(DetailView):
         })
 
         return self.get(*args, **kwargs)
+
+
+class CryptographyObjectUpdate(UpdateView):
+    """
+    Used for updating of a CryptographyObject.
+    """
+    model = models.CryptographyObject
+    slug_field = 'pk'
+    slug_url_kwarg = 'object_id'
+    fields = '__all__'
+
+    def get_success_url(self):
+        return reverse('main:cryptography_object', kwargs={'object_id': self.object.id})
 
 
 def export_key(request, object_id=None, public_key=False):
@@ -197,7 +130,7 @@ def generate_keys(request):
     """
     if request.method != "GET" or not request.is_ajax():
         return HttpResponse('')
-    cipher_key_length_relation_id = request.GET.get()
+    cipher_key_length_relation_id = request.GET.get('cipher_key_length_relation_id')
     if not cipher_key_length_relation_id:
         cipher_key_length_relation_id = 0
     cipher_key_length_relation = models.CipherKeyLengthRelation.objects.filter(id=cipher_key_length_relation_id).first()

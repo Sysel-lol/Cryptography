@@ -15,7 +15,7 @@ class CryptographyObjectForm(forms.ModelForm):
     """
     def __init__(self, *args, **kwargs):
 
-        if 'instance' not in kwargs:
+        if 'instance' not in kwargs or not kwargs['instance']:
             kwargs['instance'] = models.CryptographyObject()
         instance = kwargs['instance']
 
