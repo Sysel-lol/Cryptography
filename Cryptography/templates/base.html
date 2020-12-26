@@ -12,17 +12,17 @@
 <body>
     <script src="{% static '/js/base.js' %}"></script>
     <div class="centered-block">
-    <div style="width: 60%;">
-        <div class="centered-block" style="justify-content: space-between; padding: 0px 30px 10px 20px; margin-top:5px">
-            <img src="{% static '/images/logo.png' %}" height="60px" style="display: inline-block">
-            <div id="user_block">
-                <button id="get_user_info" class="button btn" style="margin-top:10px;">Получить данные пользователя</button>
+        <div style="width: 60%;">
+            <div class="centered-block" style="justify-content: space-between; padding: 0px 30px 10px 20px; margin-top:5px">
+                <img src="{% static '/images/logo.png' %}" height="60px" style="display: inline-block">
+                <div id="user_block">
+                    <button id="get_user_info" class="button btn" style="margin-top:10px;">Получить данные пользователя</button>
+                </div>
+            </div>
+            <div class="content">
+                {% block content %}{% endblock %}
             </div>
         </div>
-        <div class="content">
-            {% block content %}{% endblock %}
-        </div>
-    </div>
     </div>
 </body>
 </html>

@@ -12,7 +12,7 @@ def reverse(apps, schema_editor):
 
 class Migration(migrations.Migration):
     dependencies = [
-        ('main', '0008_auto_20201211_1006')
+        ('main', '0012_remove_cipher_class_name')
     ]
 
     operations = [

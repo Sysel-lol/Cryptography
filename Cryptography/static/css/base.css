@@ -40,13 +40,17 @@ p {
     margin-top: 1em!important;
 }
 
+a {
+    text-decoration: none!important;
+}
+
 .errorlist li {
     margin-top: 1em!important;
 }
 
 .content {
     background-color: rgba(0, 0, 0, 0.7);
-    padding: 40px
+    padding: 20px 40px 40px 40px
 }
 
 .centered-block {

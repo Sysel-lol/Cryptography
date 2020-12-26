@@ -9,7 +9,7 @@ from django.http import HttpResponse
 from django.utils.encoding import escape_uri_path
 from django.shortcuts import reverse
 
-from Cryptography.settings import MEDIA_ROOT, SECRET_KEY
+from Cryptography.settings import SECRET_KEY
 from Cryptography.apps.main import adapters
 
 
@@ -38,7 +38,6 @@ class Cipher(models.Model):
     Represents cipher object in the project.
     """
     name = models.CharField('Название шифра', max_length=128)
-    class_name = models.CharField('Имя класса', max_length=128)
     is_asymmetric = models.BooleanField('Тип', choices=[
         (False, 'Симметричный'),
         (True, 'Ассиметричный')
@@ -57,8 +56,7 @@ class Cipher(models.Model):
         name = name.upper()
         if name in Cipher._CIPHER_ENGINES:
             return Cipher._CIPHER_ENGINES[name]
-        else:
-            return False
+        return False
 
     @property
     def engine(self):

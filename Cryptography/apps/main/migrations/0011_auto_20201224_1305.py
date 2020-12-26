@@ -7,7 +7,7 @@ import django.db.models.deletion
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('main', '0011_remove_cryptographyobject_is_file'),
+        ('main', '0010_remove_cryptographyobject_is_file'),
     ]
 
     operations = [

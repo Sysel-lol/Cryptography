@@ -2,8 +2,17 @@
 {% load static %}
 
 {% block title %}{{ cryptography_object_form.instance.name }} | Криптография{% endblock %}
+{% block breadcrumbs %} /
+    <a href="{% url 'main:cryptography_object' object_id=object_id %}">
+        {{ cryptography_object_form.instance.name }}
+    </a>
+{% endblock %}
 
 {% block content %}
+    <small>
+        <a href="{% url 'main:index' %}">Домашняя страница</a> >
+        {{ cryptography_object_form.instance.name }}
+    </small>
     <div class="centered-block">
         <div class="div-block">
 {#            Выбор объекта#}
@@ -20,6 +29,9 @@
                 </select>
             </div>
             <br>
+            {% for message in messages %}
+                {{ message.message }}
+            {% endfor %}
             <p {% if cryptography_object_form.errors %}style="display: none"{% endif %}>
                 <button id="show_object_properties"><img height="17px" src="{% static '/images/properties.png' %}" style="margin-right: 8px; margin-bottom: 1px">Показать свойства объекта</button>
             </p>

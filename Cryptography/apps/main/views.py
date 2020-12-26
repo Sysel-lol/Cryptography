@@ -5,6 +5,7 @@ from django.shortcuts import render, redirect, reverse
 from django.http import HttpResponse, JsonResponse
 from django.views.generic.edit import UpdateView, CreateView
 from django.views.generic.detail import DetailView
+from django.contrib import messages
 
 from Cryptography.apps.main import forms, models
 
@@ -105,6 +106,10 @@ class CryptographyObjectUpdate(UpdateView):
     slug_field = 'pk'
     slug_url_kwarg = 'object_id'
     fields = '__all__'
+
+    def form_invalid(self, form: forms.CryptographyObjectForm):
+        messages.error(self.request, form.non_field_errors())
+        return redirect(reverse('main:cryptography_object', kwargs={'object_id': self.object.id}))
 
     def get_success_url(self):
         return reverse('main:cryptography_object', kwargs={'object_id': self.object.id})
