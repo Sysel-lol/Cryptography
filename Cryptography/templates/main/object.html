@@ -19,7 +19,7 @@
             Выберите объект:
             <div class="div-block">
                 <select class="form-control"  class="form-control"  id="select_object"  style="margin-top: 20px">
-                    <option value>Создать новый объект...</option>
+                    <option value="/">Создать новый объект...</option>
                     {% for cryptography_object in cryptography_object_list %}
                         <option value="{{ cryptography_object.get_absolute_url }}"
                                 {% if cryptography_object.id == cryptography_object_form.instance.id %}selected{% endif %}>

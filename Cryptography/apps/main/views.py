@@ -65,6 +65,8 @@ class CryptographyObjectView(DetailView):
     def get_context_data(self, **kwargs):
         context_data = super(CryptographyObjectView, self).get_context_data(**kwargs)
         context_data['cryptography_object_form'] = forms.CryptographyObjectForm(instance=self.object)
+        context_data['cryptography_object_form'].fields['cipher'].queryset = \
+            models.Cipher.objects.filter(is_asymmetric=self.object.cipher.is_asymmetric)
         context_data['input_form'] = self.input_form
         context_data['object_id'] = self.object.id
         context_data['cryptography_object_list'] = self.model.objects.all()
@@ -152,7 +154,7 @@ def cipher_defaults(request):
     """
     if request.method != "GET" or not request.is_ajax():
         return HttpResponse('')
-    cipher_id = int(request.GET.get())
+    cipher_id = int(request.GET.get('cipher_id'))
     cipher = models.Cipher.objects.filter(id=cipher_id).first()
     if not cipher:
         return JsonResponse('Шифр с данным ID не найден.')
