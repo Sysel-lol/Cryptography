@@ -1,7 +1,6 @@
 import copy
 
 from django import forms
-from django.core.files.storage import FileSystemStorage
 from django.core.exceptions import ValidationError
 
 from Cryptography.apps.main import models

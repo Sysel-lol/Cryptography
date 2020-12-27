@@ -162,7 +162,7 @@ class RSAAdapter(ICipher):
             try:
                 private_key_instance = serialization.load_pem_private_key(private_key, b'password')
             except Exception as e:
-                print('Не удалось получить закрытый ключ: ошибка в исходных данных.', e)
+                pass
 
         public_key_instance = None
 
@@ -172,7 +172,7 @@ class RSAAdapter(ICipher):
             try:
                 public_key_instance = serialization.load_pem_public_key(public_key)
             except Exception as e:
-                print('Не удалось получить открытый ключ: ошибка в исходных данных.', e)
+                pass
 
         if private_key and public_key:
             return private_key_instance, public_key_instance

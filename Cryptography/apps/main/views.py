@@ -2,7 +2,7 @@ import requests
 import json
 
 from django.shortcuts import render, redirect, reverse
-from django.http import HttpResponse, JsonResponse
+from django.http import HttpResponse, JsonResponse, HttpResponseNotFound
 from django.views.generic.edit import UpdateView, CreateView
 from django.views.generic.detail import DetailView
 from django.contrib import messages
@@ -136,15 +136,21 @@ def generate_keys(request):
     Used by AJAX for generating new keys without page refresh.
     """
     if request.method != "GET" or not request.is_ajax():
-        return HttpResponse('')
+        return HttpResponseNotFound()
     cipher_key_length_relation_id = request.GET.get('cipher_key_length_relation_id')
     if not cipher_key_length_relation_id:
         cipher_key_length_relation_id = 0
     cipher_key_length_relation = models.CipherKeyLengthRelation.objects.filter(id=cipher_key_length_relation_id).first()
     if not cipher_key_length_relation:
-        return JsonResponse('Не могу определить длину ключа.')
+        return HttpResponseNotFound('Не могу определить длину ключа.')
     new_keys = cipher_key_length_relation.cipher.engine.new_keys(cipher_key_length_relation.cipher_key_length.length)
-    return JsonResponse({'data': [str(new_keys[0]), str(new_keys[1])]})
+    fingerprint = models.Cipher.get_fingerprint(new_keys[1])
+    if not fingerprint:
+        fingerprint = "None"
+    return JsonResponse({
+        'data': [str(new_keys[0]), str(new_keys[1])],
+        'fingerprint': "Fingerprint: " + fingerprint
+    })
 
 
 def cipher_defaults(request):
@@ -153,11 +159,11 @@ def cipher_defaults(request):
     Used by AJAX when a user changes a cipher in the select element.
     """
     if request.method != "GET" or not request.is_ajax():
-        return HttpResponse('')
+        return HttpResponseNotFound()
     cipher_id = int(request.GET.get('cipher_id'))
     cipher = models.Cipher.objects.filter(id=cipher_id).first()
     if not cipher:
-        return JsonResponse('Шифр с данным ID не найден.')
+        return HttpResponseNotFound('Шифр с данным ID не найден.')
     form = forms.CryptographyObjectForm(instance=models.CryptographyObject(cipher=cipher))
     return JsonResponse({
         'key_length': str(form['key_length'].label)+": "+str(form['key_length']),

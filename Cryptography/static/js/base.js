@@ -59,6 +59,7 @@ function generate_keys(form)
             var keys = response['data'];
             form.find('#id_private_key').html(keys[0]);
             form.find('#id_public_key').html(keys[1]);
+            form.find('#fingerprint').html(response['fingerprint']);
         },
         error: function(data) {
             alert("There's been an error performing the request.")

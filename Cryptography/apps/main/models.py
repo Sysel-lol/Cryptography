@@ -58,6 +58,15 @@ class Cipher(models.Model):
             return Cipher._CIPHER_ENGINES[name]
         return False
 
+    @staticmethod
+    def get_fingerprint(key: str):
+        key = str(key)
+        if not key:
+            return False
+        hash_value = hashlib.sha256(key.encode('utf8')).hexdigest().upper()
+        fingerprint = ':'.join(hash_value[i:i + 4] for i in range(0, len(hash_value), 4))
+        return fingerprint
+
     @property
     def engine(self):
         """
@@ -226,7 +235,8 @@ class CryptographyObject(models.Model):
         """
         public_key = str(self.get_keys()[1])
         if self.cipher.is_asymmetric and public_key:
-            return "SHA512: "+hashlib.sha512(public_key.encode('utf8')).hexdigest()
+            fingerprint = Cipher.get_fingerprint(public_key)
+            return "Fingerprint: "+fingerprint
         return False
 
     @property
